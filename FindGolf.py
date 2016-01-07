@@ -70,8 +70,8 @@ def find_ball(capture, noimage, nothreshold):
     ret, frame = capture.read()  # 获取每一帧
     text = "searching golf..."
 
-    frame = cv2.resize(frame, (0, 0), fx=0.8, fy=0.8)  # set window's size
-
+    # frame = cv2.resize(frame, (0, 0), fx=0.8, fy=0.8)  # set window's size
+    frame= cv2.resize()
     if frame is not None:
         hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)  # convert BGR to HSV
         # 色度，饱和度，明度（纯度）
@@ -90,20 +90,20 @@ def find_ball(capture, noimage, nothreshold):
                                                       cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         pass  # version2.0加入圆检测
-        # circles = cv2.HoughCircles(image, cv2.HOUGH_GRADIENT, 1, 20, param1=50,
-        #                            param2=50, minRadius=0, maxRadius=0)
-        # # circles=np.uint16(np.around(circles))
-        # # for i in circles[0,:]:
-        # if circles is not None:
-        #     # convert the (x, y) coordinates and radius of the circles to integers
-        #     circles = np.round(circles[0, :]).astype("int")
-        #
-        #     # loop over the (x, y) coordinates and radius of the circles
-        #     for (x, y, r) in circles:
-        #         # draw the circle in the output image, then draw a rectangle
-        #         # corresponding to the center of the circle
-        #         cv2.circle(frame, (x, y), r, (0, 255, 255), 4)
-        #         cv2.rectangle(frame, (x - 5, y - 5), (x + 5, y + 5), (0, 128, 255), -1)
+        circles = cv2.HoughCircles(v,cv2.HOUGH_GRADIENT, 1, 20, param1=90,
+                                   param2=40, minRadius=0, maxRadius=100)
+        # circles=np.uint16(np.around(circles))
+        # for i in circles[0,:]:
+        if circles is not None:
+            # convert the (x, y) coordinates and radius of the circles to integers
+            circles = np.round(circles[0, :]).astype("int")
+            # print(circles)
+            # loop over the (x, y) coordinates and radius of the circles
+            for (x, y, r) in circles:
+                # draw the circle in the output image, then draw a rectangle
+                # corresponding to the center of the circle
+                cv2.circle(frame, (x, y), r, (0, 255, 255), 4)
+                # cv2.rectangle(frame, (x - 5, y - 5), (x + 5, y + 5), (0, 128, 255), -1)
 
         for cnt in contours:
 
@@ -137,8 +137,8 @@ def find_ball(capture, noimage, nothreshold):
 
         if noimage == False:
             cv2.imshow("h-image", h)
-            cv2.imshow("s-image",s)
-            cv2.imshow("v-image",v)
+            cv2.imshow("s-image", s)
+            cv2.imshow("v-image", v)
             cv2.imshow("original image", frame)
 
         if nothreshold == False:
@@ -165,7 +165,7 @@ def main():
     nothreshold = False
 
     print('Initialize Camera...')  # ,
-    capture = cv2.VideoCapture(0)
+    capture = cv2.VideoCapture(-1)
 
     if capture is not None:
         print('OK...')
