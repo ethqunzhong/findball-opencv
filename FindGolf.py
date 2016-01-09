@@ -1,7 +1,7 @@
 #!usr/bin/python
 # -*-encoding:utf-8 -*-
 """
-__author__ = 'this.zyq'
+__author__ = 'YingqunZhong'
 version:1.1
 """
 import numpy as np
@@ -11,15 +11,19 @@ import sys
 import time
 import datetime
 
-SCREEN_WIDTH = 320
-SCREEN_HEIGHT = 240
 
-GREEN_PIN = 5
-RED_PIN = 4
+# SCREEN_WIDTH = 320
+# SCREEN_HEIGHT = 240
+#
+# GREEN_PIN = 5
+# RED_PIN = 4
 
 # 设置黄色乒乓球颜色范围
-HSV_MIN = np.array((15, 100, 100))
-HSV_MAX = np.array((45, 255, 255))
+# HSV_MIN = np.array((14, 90, 90))
+# HSV_MAX = np.array((45, 255, 255))
+
+def noting(x):
+    pass
 
 
 def distance(x1, y1, x2, y2):
@@ -32,6 +36,21 @@ def distance(x1, y1, x2, y2):
 def find_ball(capture, noimage, nothreshold):
     global HSV_MIN
     global HSV_MAX
+    cv2.createTrackbar('Hl', 'thresholded image', 15, 255, noting)
+    cv2.createTrackbar('Sl', 'thresholded image', 90, 255, noting)
+    cv2.createTrackbar('Vl', 'thresholded image', 90, 255, noting)
+    cv2.createTrackbar('Hh', 'thresholded image', 45, 255, noting)
+    cv2.createTrackbar('Sh', 'thresholded image', 200, 255, noting)
+    cv2.createTrackbar('Vh', 'thresholded image', 200, 255, noting)
+    Hlow = cv2.getTrackbarPos('Hl', 'thresholded image')
+    Slow = cv2.getTrackbarPos('Sl', 'thresholded image')
+    Vlow = cv2.getTrackbarPos('Vl', 'thresholded image')
+    Hhigh = cv2.getTrackbarPos('Hh', 'thresholded image')
+    Shigh = cv2.getTrackbarPos('Sh', 'thresholded image')
+    Vhigh = cv2.getTrackbarPos('Vh', 'thresholded image')
+
+    HSV_MIN = np.array((int(Hlow), int(Slow), int(Vlow)))
+    HSV_MAX = np.array((int(Hhigh), int(Shigh), int(Vhigh)))
 
     Cx, Cy = 0, 0
     maxdiag = 0  # 判断面积
@@ -46,7 +65,7 @@ def find_ball(capture, noimage, nothreshold):
     if frame is not None:
         hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)  # convert BGR to HSV
         # 色度，饱和度，明度（纯度）
-        # hsv_frame = cv2.GaussianBlur(hsv_frame, (21,21), 0) # 高斯滤波
+        # hsv_frame = cv2.GaussianBlur(hsv_frame, (6,6), 0) # 高斯滤波
         h, s, v = cv2.split(hsv_frame)
         thresholded = cv2.inRange(hsv_frame, HSV_MIN, HSV_MAX)  # inrange函数二值化
 
@@ -72,7 +91,8 @@ def find_ball(capture, noimage, nothreshold):
             current_diag = math.sqrt(w * w + h * h) / 2
             current_diag = current_diag / (math.sqrt(2))
             if (current_diag > maxdiag):
-                maxdiag, Cx, Cy = 1.00 * current_diag, int(1.023 * cx), int(1.06 * cy)  # change
+                maxdiag, Cx, Cy = current_diag, int(cx), int(cy)  # change
+                # maxdiag, Cx, Cy = 1.20 * current_diag, int(1.023 * cx), int(1.06 * cy)  # change
 
         circles = cv2.HoughCircles(v, cv2.HOUGH_GRADIENT, 1, 20, param1=90,
                                    param2=40, minRadius=0, maxRadius=100)
@@ -81,11 +101,12 @@ def find_ball(capture, noimage, nothreshold):
             circles = np.round(circles[0, :]).astype("int")
 
             for (x, y, r) in circles:
-                if distance(x, y, Cx, Cy) < r:
-                    cv2.circle(frame, (x, y), r, (0, 255, 255), 4)
-                    cv2.circle(frame, (x, y), 2, (0, 0, 255), 5)
-                    cv2.circle(frame, (Cx, Cy), int(maxdiag), (0, 255, 0), 3)
-                    cv2.circle(frame, (Cx, Cy), 2, (255, 0, 0), 5)
+                cv2.circle(v, (x, y), r, (0, 0, 238), 4)
+            if distance(x, y, Cx, Cy) < r:
+                cv2.circle(frame, (x, y), r, (0, 0, 238), 4)
+                cv2.circle(frame, (x, y), 2, (0, 0, 255), 5)
+                cv2.circle(frame, (Cx, Cy), int(maxdiag), (0, 255, 0), 3)
+                cv2.circle(frame, (Cx, Cy), 2, (255, 0, 0), 5)
 
             # for (x, y, r) in circles:
             #         cv2.circle(frame, (x, y), r, (0, 255, 255), 4)
